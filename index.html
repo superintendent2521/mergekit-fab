@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 20px;
+        }
+
+        form {
+            max-width: 600px;
+            margin: auto;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            box-sizing: border-box;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+    <title>MergeKit Configuration</title>
+</head>
+<body>
+    <form id="mergeForm">
+        <label for="mergeMethod">Merge Method:</label>
+        <select id="mergeMethod" name="mergeMethod">
+            <option value="linear">Linear</option>
+            <!-- Add more merge methods as needed -->
+        </select>
+
+        <label for="dtype">Data Type:</label>
+        <select id="dtype" name="dtype">
+            <option value="float16">float16</option>
+            <option value="float32">float32</option>
+            <!-- Add more data types as needed -->
+        </select>
+
+        <div id="modelsContainer">
+            <!-- Models will be dynamically added here -->
+        </div>
+
+        <button type="button" onclick="addModel()">Add Model</button>
+        <button type="button" onclick="generateYAML()">Generate YAML</button>
+    </form>
+
+    <script>
+        function addModel() {
+            const modelsContainer = document.getElementById('modelsContainer');
+
+            const modelDiv = document.createElement('div');
+            modelDiv.innerHTML = `
+                <label for="modelName">Model Name:</label>
+                <input type="text" name="modelName[]" required>
+                
+                <label for="weight">Weight:</label>
+                <input type="number" name="weight[]" step="0.1" required>
+                <hr>
+            `;
+
+            modelsContainer.appendChild(modelDiv);
+        }
+
+        function generateYAML() {
+            const mergeForm = document.getElementById('mergeForm');
+            const formData = new FormData(mergeForm);
+            const models = [];
+
+            formData.getAll('modelName[]').forEach((name, index) => {
+                const weight = formData.getAll('weight[]')[index];
+                models.push({
+                    model: name,
+                    parameters: {
+                        weight: parseFloat(weight)
+                    }
+                });
+            });
+
+            const mergeMethod = formData.get('mergeMethod');
+            const dtype = formData.get('dtype');
+
+            const yamlContent = `
+models:
+${models.map(model => `  - model: ${model.model}\n    parameters:\n      weight: ${model.parameters.weight}`).join('\n')}
+merge_method: ${mergeMethod}
+dtype: ${dtype}
+`;
+
+            const blob = new Blob([yamlContent], { type: 'text/yaml' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'mergekit_config.yaml';
+            link.click();
+        }
+    </script>
+</body>
+</html>
