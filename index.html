@@ -58,6 +58,9 @@
 
         <button type="button" onclick="addModel()">Add Model</button>
         <button type="button" onclick="generateYAML()">Generate YAML</button>
+
+        <label for="fileName">File Name:</label>
+        <input type="text" id="fileName" name="fileName" placeholder="mergekit_config" required>
     </form>
 
     <script>
@@ -80,6 +83,13 @@
         function generateYAML() {
             const mergeForm = document.getElementById('mergeForm');
             const formData = new FormData(mergeForm);
+
+            // Ensure at least two models are added
+            if (formData.getAll('modelName[]').length < 2) {
+                alert('Please add at least two models.');
+                return;
+            }
+
             const models = [];
 
             formData.getAll('modelName[]').forEach((name, index) => {
@@ -94,6 +104,7 @@
 
             const mergeMethod = formData.get('mergeMethod');
             const dtype = formData.get('dtype');
+            const fileName = formData.get('fileName');
 
             const yamlContent = `
 models:
@@ -105,7 +116,7 @@ dtype: ${dtype}
             const blob = new Blob([yamlContent], { type: 'text/yaml' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = 'mergekit_config.yaml';
+            link.download = `${fileName}.yaml`;
             link.click();
         }
     </script>
