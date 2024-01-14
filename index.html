@@ -44,7 +44,7 @@
             <option value="linear">Linear</option>
             <!-- Add more merge methods as needed -->
         </select>
-        
+
         <div id="modelsContainer">
             <!-- Models will be dynamically added here -->
         </div>
@@ -66,7 +66,7 @@
                 <input type="text" name="modelName[]" required>
                 
                 <label for="weight">Weight:</label>
-                <input type="number" name="weight[]" step="0.1" required>
+                <input type="number" name="weight[]" step="0.1" max="1" required>
                 <hr>
             `;
 
@@ -90,7 +90,7 @@
                 models.push({
                     model: name,
                     parameters: {
-                        weight: parseFloat(weight)
+                        weight: Math.min(parseFloat(weight), 1)  // Limit weight to 1
                     }
                 });
             });
@@ -115,3 +115,4 @@ dtype: ${dtype}
     </script>
 </body>
 </html>
+
